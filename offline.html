@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Offline — PhilCST</title>
+  <link rel="icon" href="icons/icon-192x192.png" type="image/png"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:          #0d0a1a;
+      --cream:        #faf8f3;
+      --royal:        #3b1f7a;
+      --royal-light:  #5a35b8;
+      --gold:         #c8922a;
+      --gold-light:   #e8b84b;
+      --text-muted:   rgba(13,10,26,0.45);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 24px;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* Animated decorative ring */
+    .ring-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 32px;
+    }
+
+    .ring-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ring-inner {
+      position: absolute;
+      inset: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--royal), var(--royal-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(59, 31, 122, 0.3);
+    }
+
+    .ring-inner img {
+      width: 60%;
+      height: 60%;
+      object-fit: contain;
+      filter: brightness(0) invert(1) opacity(0.9);
+    }
+
+    .offline-icon {
+      font-size: 28px;
+      line-height: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.7; transform: scale(0.92); }
+    }
+
+    .brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--royal-light);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 6vw, 44px);
+      font-weight: 300;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    h1 strong {
+      font-weight: 700;
+      color: var(--royal);
+    }
+
+    .divider {
+      width: 64px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--royal-light), var(--gold));
+      border-radius: 2px;
+      margin: 20px auto;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 440px;
+      margin-bottom: 8px;
+    }
+
+    .cached-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59, 31, 122, 0.07);
+      border: 1px solid rgba(59, 31, 122, 0.15);
+      border-radius: 100px;
+      padding: 8px 18px;
+      font-size: 13px;
+      color: var(--royal-light);
+      font-weight: 500;
+      margin-top: 24px;
+      margin-bottom: 32px;
+    }
+
+    .cached-notice .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dot-blink 1.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes dot-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: var(--royal);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(59, 31, 122, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--royal-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59, 31, 122, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--royal);
+      border: 1.5px solid rgba(59, 31, 122, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(59, 31, 122, 0.06);
+      border-color: var(--royal);
+    }
+
+    .status-bar {
+      margin-top: 48px;
+      padding: 16px 24px;
+      background: rgba(200, 146, 42, 0.06);
+      border: 1px solid rgba(200, 146, 42, 0.18);
+      border-radius: 10px;
+      font-size: 13px;
+      color: #8a620f;
+      max-width: 440px;
+      line-height: 1.6;
+    }
+
+    .status-bar strong { color: #7a540a; }
+
+    /* Connection status indicator */
+    #conn-status {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    #conn-status .indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    #conn-status.online  .indicator { background: #22c55e; }
+    #conn-status.offline .indicator { background: #ef4444; }
+
+    footer {
+      margin-top: 56px;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    footer a {
+      color: var(--royal-light);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Animated logo ring -->
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#3b1f7a" stop-opacity="0.6"/>
+            <stop offset="50%"  stop-color="#c8922a"/>
+            <stop offset="100%" stop-color="#3b1f7a" stop-opacity="0.2"/>
+          </linearGradient>
+        </defs>
+        <circle cx="60" cy="60" r="56" fill="none" stroke="url(#g)"
+                stroke-width="2.5" stroke-dasharray="220 100" stroke-linecap="round"/>
+      </svg>
+      <div class="ring-inner">
+        <div class="offline-icon">📡</div>
+      </div>
+    </div>
+
+    <div class="brand">PhilCST</div>
+
+    <h1>You're <strong>Offline</strong></h1>
+    <div class="divider"></div>
+
+    <p>It looks like you've lost your internet connection. Some cached content may still be available.</p>
+
+    <div class="cached-notice">
+      <span class="dot"></span>
+      Cached pages available from your last visit
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="retryConnection()">
+        ↻ &nbsp;Try Again
+      </button>
+      <a href="/" class="btn btn-secondary">
+        ⌂ &nbsp;Go to Homepage
+      </a>
+    </div>
+
+    <div class="status-bar">
+      <strong>While offline, you can still:</strong><br/>
+      Browse previously visited pages · View cached academic info ·
+      Check program listings you've already loaded
+    </div>
+
+    <div id="conn-status" class="offline">
+      <span class="indicator"></span>
+      <span id="conn-label">No internet connection</span>
+    </div>
+
+    <footer>
+      <a href="https://philcst.edu.ph" target="_blank">Philippine College of Science and Technology</a>
+      &nbsp;·&nbsp; Calasiao, Pangasinan
+    </footer>
+
+  </div>
+
+  <script>
+    function retryConnection() {
+      window.location.reload();
+    }
+
+    function updateConnectionStatus() {
+      const el    = document.getElementById('conn-status');
+      const label = document.getElementById('conn-label');
+      if (navigator.onLine) {
+        el.className = 'online';
+        label.textContent = 'Back online! Redirecting…';
+        setTimeout(() => window.location.href = '/', 1200);
+      } else {
+        el.className = 'offline';
+        label.textContent = 'No internet connection';
+      }
+    }
+
+    window.addEventListener('online',  updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+/*
+ * style.css — PhilCST Attendance System
+ * External stylesheet — all media queries live in index.html <style>
+ * This file keeps only non-conflicting utility overrides.
+ */
+
+/* Scrollable tables on all screens */
+.table-scroll-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 520px;
+}
+
+/* Ensure inputs don't overflow containers */
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Sidebar Hover Logic */
+.sidebar {
+    position: fixed;
+    left: -240px; /* Tago muna siya */
+    top: 0;
+    height: 100vh;
+    width: 260px;
+    background: var(--panel);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 999;
+    padding-left: 20px;
+}
+
+/* Pag tinapat yung mouse sa left side ng screen */
+.sidebar-trigger {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 15px; /* Manipis lang na area para sa hover */
+    height: 100vh;
+    z-index: 1000;
+}
+
+.sidebar-trigger:hover + .sidebar, .sidebar:hover {
+    left: 0; /* Lalabas na siya */
+}
+
+/* Responsive Fixes */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: hidden; /* Iwas scrollbar sa ilalim */
+}
+
+/* Loading/No Signal Animation */
+
+/*
+ * style.css — PhilCST Attendance System
+ * Network-aware loading animation + production-grade utilities
+ * External stylesheet — media queries supplement index.html <style>
+ */
+
+/* ═══════════════════════════════════════════════
+   DESIGN TOKEN SUPPLEMENTS
+   (Adds to the :root block in index.html)
+═══════════════════════════════════════════════ */
+:root {
+  --philcst-purple: #6b21a8;
+  --philcst-gold: #d4a017;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Source Sans 3', sans-serif;
+
+  /* Loader speed colours */
+  --signal-fast:   #34d399;   /* 4G / WiFi — green */
+  --signal-medium: #fbbf24;   /* 3G — amber */
+  --signal-slow:   #f87171;   /* 2G / offline — red */
+  --signal-none:   #6b5f90;   /* no connection */
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLABLE TABLES
+═══════════════════════════════════════════════ */
+.table-scroll-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table { min-width: 520px; }
+
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE CONTAINER
+═══════════════════════════════════════════════ */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   ╔══════════════════════════════════════╗
+   ║   NETWORK-AWARE SPLASH LOADER        ║
+   ╚══════════════════════════════════════╝
+
+   How it works:
+   1. JS measures connection speed via Network Information API
+      OR runs a small timing probe (fetches a tiny blob).
+   2. Sets data-speed="fast|medium|slow|offline" on #page-loader.
+   3. CSS reacts — colour, bar heights, label text all change.
+   4. JS removes #page-loader (fade-out) once the page is ready.
+═══════════════════════════════════════════════ */
+
+/* ── Overlay Shell ──────────────────────────── */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  overflow: hidden;
+
+  /* Multi-layer gradient — matches the app's ambient bg */
+  background:
+    radial-gradient(ellipse 80% 60% at 75% 90%, rgba(88,28,135,0.60) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 20% 15%, rgba(109,40,217,0.40) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 55% 50%, rgba(60,10,120,0.25) 0%, transparent 60%),
+    linear-gradient(160deg, #0a0318 0%, #100625 25%, #180935 55%, #100625 80%, #0a0318 100%);
+
+  /* Subtle noise grain overlay */
+  background-size: cover, cover, cover, cover;
+
+  transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1),
+              visibility 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Grain texture via SVG filter */
+#page-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Ambient animated orb — top left */
+#page-loader::after {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(139,92,246,0.22) 0%, transparent 65%);
+  top: -160px;
+  left: -160px;
+  animation: loaderOrbDrift 12s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes loaderOrbDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(40px, 30px) scale(1.08); }
+  100% { transform: translate(-20px, 60px) scale(0.96); }
+}
+
+/* ── Hidden state ──────────────────────────── */
+#page-loader.done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Logo / Brand mark ─────────────────────── */
+.loader-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 40px;
+  animation: loaderFadeUp 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.loader-brand-text {
+  font-family: 'Syne', 'Space Mono', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  line-height: 1;
+}
+
+.loader-brand-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(167,139,250,0.6);
+}
+
+/* ── Signal bars container ─────────────────── */
+.loader-signal-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: loaderFadeUp 0.7s 0.12s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.loader-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 32px;
+}
+
+/* Individual bar */
+.loader-bar {
+  width: 7px;
+  border-radius: 3px 3px 2px 2px;
+  background: rgba(139,92,246,0.15);
+  transition: background 0.4s ease, height 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+
+/* Heights — staircase pattern */
+.loader-bar:nth-child(1) { height: 8px;  animation-delay: 0.00s; }
+.loader-bar:nth-child(2) { height: 13px; animation-delay: 0.08s; }
+.loader-bar:nth-child(3) { height: 19px; animation-delay: 0.16s; }
+.loader-bar:nth-child(4) { height: 25px; animation-delay: 0.24s; }
+.loader-bar:nth-child(5) { height: 32px; animation-delay: 0.32s; }
+
+/* Pulse animation — active bars glow */
+.loader-bar.active {
+  animation: barPulse 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes barPulse {
+  0%   { opacity: 0.55; transform: scaleY(0.92); }
+  100% { opacity: 1;    transform: scaleY(1); }
+}
+
+/* ── SPEED STATES — colour + lit bars ───────── */
+
+/* FAST (WiFi / 4G+) — all 5 bars green */
+#page-loader[data-speed="fast"] .loader-bar {
+  background: var(--signal-fast);
+  box-shadow: 0 0 10px rgba(52,211,153,0.55), 0 0 24px rgba(52,211,153,0.20);
+}
+#page-loader[data-speed="fast"] .loader-status-dot { background: var(--signal-fast); box-shadow: 0 0 8px rgba(52,211,153,0.7); }
+#page-loader[data-speed="fast"] .loader-status-label::before { content: "FAST CONNECTION"; }
+#page-loader[data-speed="fast"] .loader-progress-fill { background: linear-gradient(90deg, #34d399, #6ee7b7); }
+
+/* MEDIUM (3G / moderate WiFi) — 3 bars amber */
+#page-loader[data-speed="medium"] .loader-bar:nth-child(1),
+#page-loader[data-speed="medium"] .loader-bar:nth-child(2),
+#page-loader[data-speed="medium"] .loader-bar:nth-child(3) {
+  background: var(--signal-medium);
+  box-shadow: 0 0 10px rgba(251,191,36,0.55), 0 0 22px rgba(251,191,36,0.20);
+}
+#page-loader[data-speed="medium"] .loader-bar:nth-child(4),
+#page-loader[data-speed="medium"] .loader-bar:nth-child(5) {
+  background: rgba(251,191,36,0.12);
+  animation: none;
+}
+#page-loader[data-speed="medium"] .loader-status-dot { background: var(--signal-medium); box-shadow: 0 0 8px rgba(251,191,36,0.7); }
+#page-loader[data-speed="medium"] .loader-status-label::before { content: "MODERATE CONNECTION"; }
+#page-loader[data-speed="medium"] .loader-progress-fill { background: linear-gradient(90deg, #fbbf24, #fde68a); }
+
+/* SLOW (2G / edge) — 1 bar red, rest dim */
+#page-loader[data-speed="slow"] .loader-bar:nth-child(1) {
+  background: var(--signal-slow);
+  box-shadow: 0 0 10px rgba(248,113,113,0.65), 0 0 22px rgba(248,113,113,0.22);
+}
+#page-loader[data-speed="slow"] .loader-bar:nth-child(2),
+#page-loader[data-speed="slow"] .loader-bar:nth-child(3),
+#page-loader[data-speed="slow"] .loader-bar:nth-child(4),
+#page-loader[data-speed="slow"] .loader-bar:nth-child(5) {
+  background: rgba(248,113,113,0.08);
+  animation: none;
+}
+#page-loader[data-speed="slow"] .loader-status-dot {
+  background: var(--signal-slow);
+  box-shadow: 0 0 8px rgba(248,113,113,0.7);
+  animation: slowBlink 1.2s ease-in-out infinite;
+}
+#page-loader[data-speed="slow"] .loader-status-label::before { content: "SLOW CONNECTION"; }
+#page-loader[data-speed="slow"] .loader-progress-fill {
+  background: linear-gradient(90deg, #f87171, #fca5a5);
+  animation: progressSlowPulse 2.4s ease-in-out infinite;
+}
+
+/* OFFLINE — all bars dim, no label dot */
+#page-loader[data-speed="offline"] .loader-bar {
+  background: rgba(107,95,144,0.20);
+  animation: offlineBlink 2s ease-in-out infinite alternate;
+}
+#page-loader[data-speed="offline"] .loader-status-dot {
+  background: var(--signal-none);
+  animation: slowBlink 1.8s ease-in-out infinite;
+}
+#page-loader[data-speed="offline"] .loader-status-label::before { content: "NO CONNECTION"; }
+#page-loader[data-speed="offline"] .loader-progress-fill {
+  background: linear-gradient(90deg, #6b5f90, #8b7db8);
+  width: 30% !important;
+  animation: progressSlowPulse 3s ease-in-out infinite;
+}
+#page-loader[data-speed="offline"] .loader-progress-track { opacity: 0.4; }
+
+/* Default (detecting) */
+#page-loader:not([data-speed]) .loader-bar {
+  animation: detectBlink 1.4s ease-in-out infinite alternate;
+}
+#page-loader:not([data-speed]) .loader-status-label::before { content: "DETECTING…"; }
+
+/* ── Status row ─────────────────────────────── */
+.loader-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.loader-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(139,92,246,0.5);
+  flex-shrink: 0;
+  transition: background 0.4s, box-shadow 0.4s;
+}
+
+.loader-status-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(176,164,216,0.7);
+  transition: color 0.4s;
+  min-width: 140px;
+  text-align: left;
+}
+
+/* ── Progress bar ───────────────────────────── */
+.loader-progress-track {
+  width: 200px;
+  height: 2px;
+  background: rgba(139,92,246,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+  transition: opacity 0.4s;
+}
+
+.loader-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1),
+              background 0.5s ease;
+  animation: progressGrow 2.8s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+/* ── Loading message beneath bars ───────────── */
+.loader-message {
+  font-family: 'Space Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  color: rgba(139,92,246,0.45);
+  margin-top: 28px;
+  animation: loaderFadeUp 0.7s 0.25s cubic-bezier(0.34,1.56,0.64,1) both,
+             messageCycle 4s 1s ease-in-out infinite;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ── Keyframes ──────────────────────────────── */
+@keyframes loaderFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes detectBlink {
+  0%   { background: rgba(139,92,246,0.15); }
+  100% { background: rgba(139,92,246,0.55); }
+}
+
+@keyframes slowBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes offlineBlink {
+  0%   { background: rgba(107,95,144,0.10); }
+  100% { background: rgba(107,95,144,0.30); }
+}
+
+@keyframes progressGrow {
+  0%   { width: 0%; }
+  20%  { width: 28%; }
+  55%  { width: 62%; }
+  80%  { width: 84%; }
+  100% { width: 96%; }
+}
+
+@keyframes progressSlowPulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+@keyframes messageCycle {
+  0%, 30%  { opacity: 0.45; }
+  50%      { opacity: 0.75; }
+  80%,100% { opacity: 0.45; }
+}
+
+/* ── Second ambient orb (bottom right) ──────── */
+.loader-orb-br {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 60%, rgba(212,160,23,0.08) 0%, transparent 65%);
+  bottom: -120px;
+  right: -100px;
+  animation: loaderOrbDrift 15s 2s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+/* ── Decorative grid lines ──────────────────── */
+.loader-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 80%);
+}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR AUTO-HIDE LOGIC (LEGACY COMPAT)
+═══════════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: white;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  border-right: 4px solid var(--philcst-gold);
+}
+
+.sidebar-trigger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 100vh;
+  z-index: 1001;
+}
+
+.sidebar-trigger:hover + .sidebar, .sidebar:hover { left: 0; }
+
+/* ═══════════════════════════════════════════════
+   HERO SECTION
+═══════════════════════════════════════════════ */
+.hero-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 50px 5%;
+  align-items: center;
+}
+
+.hero-content { flex: 1; min-width: 300px; }
+
+.hero-image img {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 10px;
+}
+
+/* ═══════════════════════════════════════════════
+   LEGACY LOADER (kept for backwards compat)
+═══════════════════════════════════════════════ */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+}
+
+.signal-bar { display: flex; gap: 5px; align-items: flex-end; height: 30px; }
+.bar { width: 8px; background: #ddd; border-radius: 2px; }
+.bar-anim { animation: signal-blink 1s infinite alternate; }
+
+@keyframes signal-blink {
+  0%   { background: #ddd; }
+  100% { background: var(--philcst-purple); }
+}
+
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 12, 26, 0.95);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.signal-icon {
+  width: 60px;
+  height: 60px;
+  border: 4px solid var(--purple-light);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.glitch-text {
+  color: var(--purple-light);
+  font-family: 'Space Mono', monospace;
+  margin-top: 20px;
+  letter-spacing: 2px;
+}
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 12, 26, 0.95);
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.signal-icon {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--purple-light);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.glitch-text {
+    color: var(--purple-light);
+    font-family: 'Space Mono', monospace;
+    margin-top: 20px;
+    letter-spacing: 2px;
+}
+
+:root {
+  --philcst-purple: #6b21a8;
+  --philcst-gold: #d4a017;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Source Sans 3', sans-serif;
+}
+
+/* ── SIDEBAR AUTO-HIDE LOGIC ── */
+.sidebar {
+  position: fixed;
+  left: -250px; /* Tago muna */
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: white;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  border-right: 4px solid var(--philcst-gold);
+}
+
+/* Area sa gilid na pwedeng i-hover para lumabas sidebar */
+.sidebar-trigger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 100vh;
+  z-index: 1001;
+}
+
+.sidebar-trigger:hover + .sidebar, .sidebar:hover {
+  left: 0;
+}
+
+/* ── RESPONSIVE ELEMENTS ── */
+.hero-section {
+  display: flex;
+  flex-wrap: wrap; /* Para 'di mag-compress pag maliit screen */
+  gap: 20px;
+  padding: 50px 5%;
+  align-items: center;
+}
+
+.hero-content {
+  flex: 1;
+  min-width: 300px; /* Proteksyon sa compression */
+}
+
+.hero-image img {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 10px;
+}
+
+/* ── LOADING ANIMATION (POOR SIGNAL VIBE) ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.signal-bar {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+  height: 30px;
+}
+
+.bar {
+  width: 8px;
+  background: #ddd;
+  border-radius: 2px;
+}
+
+.bar-anim {
+  animation: signal-blink 1s infinite alternate;
+}
+
+@keyframes signal-blink {
+  0% { background: #ddd; }
+  100% { background: var(--philcst-purple); }
+}
+
+#loader {
+  position: fixed;
+  inset: 0;
+  background: white; /* O kahit anong color gusto mo */
+  z-index: 9999;
+  display: flex; /* Eto dapat */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+}
